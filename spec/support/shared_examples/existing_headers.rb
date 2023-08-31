@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 shared_examples 'an endpoint with existing Link headers' do
   it 'should keep existing Links' do
     expect(links).to include('<http://example.org/numbers?count=30>; rel="without"')

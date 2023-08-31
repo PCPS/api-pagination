@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 if ApiPagination.config.paginator == :will_paginate
@@ -24,7 +26,7 @@ if ApiPagination.config.paginator == :will_paginate
 
     it 'returns a Sequel::Dataset' do
       collection = ApiPagination.paginate(people).first
-      expect(collection.kind_of?(Sequel::Dataset)).to be_truthy
+      expect(collection.is_a?(Sequel::Dataset)).to be_truthy
     end
   end
 end

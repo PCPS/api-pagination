@@ -1,11 +1,13 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe ApiPagination do
-  let(:collection) {(1..100).to_a}
-  let(:active_record_relation) {double("ActiveRecord_Relation").as_null_object}
-  let(:paginate_array_options) {{ total_count: 1000 }}
+  let(:collection) { (1..100).to_a }
+  let(:active_record_relation) { double('ActiveRecord_Relation').as_null_object }
+  let(:paginate_array_options) { { total_count: 1000 } }
 
-  describe "#paginate" do
+  describe '#paginate' do
     if ENV['PAGINATOR'].to_sym == :kaminari
       context 'Using kaminari' do
         describe '.paginate' do

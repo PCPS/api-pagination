@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Grape
   module Pagination
     def self.included(base)
@@ -6,12 +8,12 @@ module Grape
           per_page = ApiPagination.config.per_page_param(params) || route_setting(:per_page)
 
           options = {
-            :page     => ApiPagination.config.page_param(params),
-            :per_page => [per_page, route_setting(:max_per_page)].compact.min
+            page: ApiPagination.config.page_param(params),
+            per_page: [per_page, route_setting(:max_per_page)].compact.min
           }
           collection, pagy = ApiPagination.paginate(collection, options)
 
-          links = (header['Link'] || "").split(',').map(&:strip)
+          links = (header['Link'] || '').split(',').map(&:strip)
           url   = request.url.sub(/\?.*$/, '')
           pages = ApiPagination.pages_from(pagy || collection, options)
 
@@ -31,7 +33,7 @@ module Grape
           header per_page_header, options[:per_page].to_s
           header page_header,     options[:page].to_s unless page_header.nil?
 
-          return collection
+          collection
         end
       end
 
@@ -44,11 +46,11 @@ module Grape
           per_page_values = enforce_max_per_page ? 0..options[:max_per_page] : nil
 
           params do
-            optional :page,     :type   => Integer, :default => 1,
-                                :desc   => 'Page of results to fetch.'
-            optional :per_page, :type   => Integer, :default => options[:per_page],
-                                :desc   => 'Number of results to return per page.',
-                                :values => per_page_values
+            optional :page,     type: Integer, default: 1,
+                                desc: 'Page of results to fetch.'
+            optional :per_page, type: Integer, default: options[:per_page],
+                                desc: 'Number of results to return per page.',
+                                values: per_page_values
           end
         end
       end

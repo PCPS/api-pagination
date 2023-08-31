@@ -1,14 +1,16 @@
+# frozen_string_literal: true
+
 require 'support/numbers_controller'
 require 'support/numbers_api'
 require 'api-pagination'
 
 if ENV['PAGINATOR'].nil?
-  warn <<-WARNING
-No PAGINATOR set. Defaulting to pagy.
+  warn <<~WARNING
+    No PAGINATOR set. Defaulting to pagy.
 
-To test against kaminari, run `PAGINATOR=kaminari bundle exec rspec`
-To test against will_paginate, run `PAGINATOR=will_paginate bundle exec rspec`
-WARNING
+    To test against kaminari, run `PAGINATOR=kaminari bundle exec rspec`
+    To test against will_paginate, run `PAGINATOR=will_paginate bundle exec rspec`
+  WARNING
 
   ENV['PAGINATOR'] = 'pagy'
 end
@@ -20,7 +22,7 @@ require 'will_paginate/array' if ENV['PAGINATOR'].to_sym == :will_paginate
 
 RSpec.configure do |config|
   config.include Rack::Test::Methods
-  config.include ControllerExampleGroup, :type => :controller
+  config.include ControllerExampleGroup, type: :controller
 
   # Disable the 'should' syntax.
   config.expect_with :rspec do |c|

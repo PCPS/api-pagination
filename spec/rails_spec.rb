@@ -1,10 +1,12 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 require 'support/shared_examples/existing_headers'
 require 'support/shared_examples/first_page'
 require 'support/shared_examples/middle_page'
 require 'support/shared_examples/last_page'
 
-describe NumbersController, :type => :controller do
+describe NumbersController, type: :controller do
   before { request.host = 'example.org' }
 
   describe 'GET #index' do
@@ -14,7 +16,7 @@ describe NumbersController, :type => :controller do
     let(:per_page) { response.headers['Per-Page'].to_i }
 
     context 'without enough items to give more than one page' do
-      before { get :index, params: {count: 10} }
+      before { get :index, params: { count: 10 } }
 
       it 'should not paginate' do
         expect(response.headers.keys).not_to include('Link')
@@ -35,26 +37,26 @@ describe NumbersController, :type => :controller do
     end
 
     context 'with existing Link headers' do
-      before { get :index, params: {count: 30, with_headers: true} }
+      before { get :index, params: { count: 30, with_headers: true } }
 
       it_behaves_like 'an endpoint with existing Link headers'
     end
 
     context 'with enough items to paginate' do
       context 'when on the first page' do
-        before { get :index, params: {count: 100} }
+        before { get :index, params: { count: 100 } }
 
         it_behaves_like 'an endpoint with a first page'
       end
 
       context 'when on the last page' do
-        before { get :index, params: {count: 100, page: 10} }
+        before { get :index, params: { count: 100, page: 10 } }
 
         it_behaves_like 'an endpoint with a last page'
       end
 
       context 'when somewhere comfortably in the middle' do
-        before { get :index, params: {count: 100, page: 2} }
+        before { get :index, params: { count: 100, page: 2 } }
 
         it_behaves_like 'an endpoint with a middle page'
       end
@@ -62,7 +64,7 @@ describe NumbersController, :type => :controller do
 
     context 'providing a block' do
       it 'yields to the block instead of implicitly rendering' do
-        get :index_with_custom_render, params: {count: 100}
+        get :index_with_custom_render, params: { count: 100 }
 
         json = { numbers: (1..10).map { |n| { number: n } } }.to_json
 
@@ -119,9 +121,9 @@ describe NumbersController, :type => :controller do
       context 'with paginated result' do
         let(:params) { { count: 20 } }
         it 'should use custom base_url in the Link header' do
-
           expect(response.headers['Link']).to eq(
-            '<http://guybrush:3000/numbers?count=20&page=2>; rel="last", <http://guybrush:3000/numbers?count=20&page=2>; rel="next"')
+            '<http://guybrush:3000/numbers?count=20&page=2>; rel="last", <http://guybrush:3000/numbers?count=20&page=2>; rel="next"'
+          )
         end
       end
     end
@@ -130,7 +132,7 @@ describe NumbersController, :type => :controller do
       before { ApiPagination.config.include_total = false }
 
       it 'should not include a Total header' do
-        get :index, params: {count: 10}
+        get :index, params: { count: 10 }
 
         expect(response.header['Total']).to be_nil
       end
@@ -157,7 +159,7 @@ describe NumbersController, :type => :controller do
         end
 
         it 'should work' do
-          get :index, params: {foo: 2, count: 100}
+          get :index, params: { foo: 2, count: 100 }
 
           expect(response.header['Page']).to eq('2')
         end
@@ -178,7 +180,7 @@ describe NumbersController, :type => :controller do
         end
 
         it 'should work' do
-          get :index, params: {foo: {bar:  2}, count: 100}
+          get :index, params: { foo: { bar:  2 }, count: 100 }
 
           expect(response.header['Page']).to eq('2')
         end
@@ -196,7 +198,7 @@ describe NumbersController, :type => :controller do
         end
 
         it 'should work' do
-          get :index_with_no_per_page, params: {foo: 2, count: 100}
+          get :index_with_no_per_page, params: { foo: 2, count: 100 }
 
           expect(response.header['Per-Page']).to eq('2')
         end
@@ -214,7 +216,7 @@ describe NumbersController, :type => :controller do
         end
 
         it 'should work' do
-          get :index_with_no_per_page, params: {foo: {bar: 2}, count: 100}
+          get :index_with_no_per_page, params: { foo: { bar: 2 }, count: 100 }
 
           expect(response.header['Per-Page']).to eq('2')
         end
@@ -229,7 +231,7 @@ describe NumbersController, :type => :controller do
         let(:params) do
           {
             paginate_array_total_count: paginate_array_total_count,
-            count: count,
+            count: count
           }
         end
 
@@ -242,10 +244,10 @@ describe NumbersController, :type => :controller do
       end
     end
 
-    if [:will_paginate, :kaminari].include?(ApiPagination.config.paginator.to_sym)
+    if %i[will_paginate kaminari].include?(ApiPagination.config.paginator.to_sym)
       context 'default per page in model' do
         before do
-          class Fixnum
+          class Integer
             @default_per_page = 6
             @per_page = 6
 
@@ -256,14 +258,14 @@ describe NumbersController, :type => :controller do
         end
 
         after do
-          class Fixnum
+          class Integer
             @default_per_page = 25
             @per_page = 25
           end
         end
 
         after :all do
-          class Fixnum
+          class Integer
             class << self
               undef_method :default_per_page, :per_page
             end
@@ -271,18 +273,18 @@ describe NumbersController, :type => :controller do
         end
 
         it 'should use default per page from model' do
-          get :index_with_no_per_page, params: {count: 100}
+          get :index_with_no_per_page, params: { count: 100 }
 
           expect(response.header['Per-Page']).to eq('6')
         end
 
         it 'should not fail if the model yields nil for per page' do
-          class Fixnum
+          class Integer
             @default_per_page = nil
             @per_page = nil
           end
 
-          get :index_with_no_per_page, params: {count: 100}
+          get :index_with_no_per_page, params: { count: 100 }
 
           expect(response.header['Per-Page']).to eq(
             case ApiPagination.config.paginator
@@ -297,7 +299,7 @@ describe NumbersController, :type => :controller do
 
     context 'default per page in objects without paginator defaults' do
       it 'should not fail if model does not respond to per page' do
-        get :index_with_no_per_page, params: {count: 100}
+        get :index_with_no_per_page, params: { count: 100 }
 
         expect(response.header['Per-Page']).to eq(
           case ApiPagination.config.paginator

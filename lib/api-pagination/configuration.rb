@@ -1,18 +1,10 @@
+# frozen_string_literal: true
+
 module ApiPagination
   class Configuration
-    attr_accessor :total_header
+    attr_accessor :total_header, :per_page_header, :page_header, :include_total, :base_url, :response_formats
 
-    attr_accessor :per_page_header
-
-    attr_accessor :page_header
-
-    attr_accessor :include_total
-
-    attr_accessor :base_url
-
-    attr_accessor :response_formats
-
-    def configure(&block)
+    def configure
       yield self
     end
 
@@ -21,11 +13,11 @@ module ApiPagination
       @per_page_header = 'Per-Page'
       @page_header     = nil
       @include_total   = true
-      @base_url   = nil
-      @response_formats = [:json, :xml]
+      @base_url = nil
+      @response_formats = %i[json xml]
     end
 
-    ['page', 'per_page'].each do |param_name|
+    %w[page per_page].each do |param_name|
       method_name = "#{param_name}_param"
       instance_variable_name = "@#{method_name}"
 
@@ -37,18 +29,16 @@ module ApiPagination
 
         if instance_variable_get(instance_variable_name).nil?
           # use :page & :per_page by default
-          instance_variable_set(instance_variable_name, (lambda { |p| p[param_name.to_sym] }))
+          instance_variable_set(instance_variable_name, (->(p) { p[param_name.to_sym] }))
         end
 
         instance_variable_get(instance_variable_name).call(params)
       end
 
       define_method "#{method_name}=" do |param|
-        if param.is_a?(Symbol) || param.is_a?(String)
-          instance_variable_set(instance_variable_name, (lambda { |params| params[param] }))
-        else
-          raise ArgumentError, "Cannot set page_param option"
-        end
+        raise ArgumentError, 'Cannot set page_param option' unless param.is_a?(Symbol) || param.is_a?(String)
+
+        instance_variable_set(instance_variable_name, (->(params) { params[param] }))
       end
     end
 
@@ -78,24 +68,24 @@ module ApiPagination
     def set_paginator
       conditions = [defined?(Pagy), defined?(Kaminari), defined?(WillPaginate::CollectionMethods)]
       if conditions.compact.size > 1
-        Kernel.warn <<-WARNING
-Warning: api-pagination relies on Pagy, Kaminari, or WillPaginate, but more than
-one are currently active. If possible, you should remove one or the other. If
-you can't, you _must_ configure api-pagination on your own. For example:
+        Kernel.warn <<~WARNING
+          Warning: api-pagination relies on Pagy, Kaminari, or WillPaginate, but more than
+          one are currently active. If possible, you should remove one or the other. If
+          you can't, you _must_ configure api-pagination on your own. For example:
 
-ApiPagination.configure do |config|
-  config.paginator = :kaminari
-end
+          ApiPagination.configure do |config|
+            config.paginator = :kaminari
+          end
 
-You should also configure Kaminari to use a different `per_page` method name as
-using these gems together causes a conflict; some information can be found at
-https://github.com/activeadmin/activeadmin/wiki/How-to-work-with-will_paginate
+          You should also configure Kaminari to use a different `per_page` method name as
+          using these gems together causes a conflict; some information can be found at
+          https://github.com/activeadmin/activeadmin/wiki/How-to-work-with-will_paginate
 
-Kaminari.configure do |config|
-  config.page_method_name = :per_page_kaminari
-end
+          Kaminari.configure do |config|
+            config.page_method_name = :per_page_kaminari
+          end
 
-WARNING
+        WARNING
       elsif defined?(Pagy)
         use_pagy
       elsif defined?(Kaminari)
@@ -116,8 +106,13 @@ WARNING
 
     def use_will_paginate
       WillPaginate::CollectionMethods.module_eval do
-        def first_page?() !previous_page end
-        def last_page?() !next_page end
+        def first_page?
+          !previous_page
+        end
+
+        def last_page?
+          !next_page
+        end
       end
 
       @paginator = :will_paginate
@@ -132,6 +127,6 @@ WARNING
     def config
       @config ||= Configuration.new
     end
-    alias :configuration :config
+    alias configuration config
   end
 end

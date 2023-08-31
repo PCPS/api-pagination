@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 shared_examples 'an endpoint with a last page' do
   it 'should not give a link with rel "last"' do
     expect(link).not_to include('rel="last"')

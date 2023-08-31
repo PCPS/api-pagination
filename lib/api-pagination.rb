@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'api-pagination/configuration'
 require 'api-pagination/version'
 
@@ -20,7 +22,7 @@ module ApiPagination
       end
     end
 
-    def pages_from(collection, options = {})
+    def pages_from(collection, _options = {})
       return pagy_pages_from(collection) if ApiPagination.config.paginator == :pagy && collection.is_a?(Pagy)
 
       {}.tap do |pages|
@@ -38,9 +40,9 @@ module ApiPagination
 
     def total_from(collection)
       case ApiPagination.config.paginator
-        when :pagy          then collection.count.to_s
-        when :kaminari      then collection.total_count.to_s
-        when :will_paginate then collection.total_entries.to_s
+      when :pagy          then collection.count.to_s
+      when :kaminari      then collection.total_count.to_s
+      when :will_paginate then collection.total_entries.to_s
       end
     end
 
@@ -55,20 +57,20 @@ module ApiPagination
 
       pagy = pagy_from(collection, options)
       collection = if collection.respond_to?(:offset) && collection.respond_to?(:limit)
-        collection.offset(pagy.offset).limit(pagy.items)
-      else
-        collection[pagy.offset, pagy.items]
-      end
+                     collection.offset(pagy.offset).limit(pagy.items)
+                   else
+                     collection[pagy.offset, pagy.items]
+                   end
 
-      return [collection, pagy]
+      [collection, pagy]
     end
 
     def pagy_from(collection, options)
-      if options[:count]
-        count = options[:count]
-      else
-        count = collection.is_a?(Array) ? collection.count : collection.count(:all)
-      end
+      count = if options[:count]
+                options[:count]
+              else
+                collection.is_a?(Array) ? collection.count : collection.count(:all)
+              end
 
       Pagy.new(count: count, items: options[:per_page], page: options[:page])
     end
@@ -96,22 +98,21 @@ module ApiPagination
 
       collection = Kaminari.paginate_array(collection, **paginate_array_options) if collection.is_a?(Array)
       collection = collection.page(options[:page]).per(options[:per_page])
-      collection.without_count if !collection.is_a?(Array) && !ApiPagination.config.include_total
+      collection.without_count if !collection.is_a?(Array) && (options[:include_total_count] || ApiPagination.config.include_total)
+
       [collection, nil]
     end
 
     def paginate_with_will_paginate(collection, options)
-      if options[:per_page] <= 0
-        options[:per_page] = default_per_page_for_will_paginate(collection)
-      end
+      options[:per_page] = default_per_page_for_will_paginate(collection) if options[:per_page] <= 0
 
-      collection = if defined?(Sequel::Dataset) && collection.kind_of?(Sequel::Dataset)
-        collection.paginate(options[:page], options[:per_page])
-      else
-        supported_options = [:page, :per_page, :total_entries]
-        options = options.dup.keep_if { |k,v| supported_options.include?(k.to_sym) }
-        collection.paginate(options)
-      end
+      collection = if defined?(Sequel::Dataset) && collection.is_a?(Sequel::Dataset)
+                     collection.paginate(options[:page], options[:per_page])
+                   else
+                     supported_options = %i[page per_page total_entries]
+                     options = options.dup.keep_if { |k, _v| supported_options.include?(k.to_sym) }
+                     collection.paginate(options)
+                   end
 
       [collection, nil]
     end
@@ -128,12 +129,13 @@ module ApiPagination
 
     def extract_per_page_from_model(collection, accessor)
       klass = if collection.respond_to?(:klass)
-        collection.klass
-      else
-        collection.first.class
-      end
+                collection.klass
+              else
+                collection.first.class
+              end
 
       return unless klass.respond_to?(accessor)
+
       klass.send(accessor)
     end
   end

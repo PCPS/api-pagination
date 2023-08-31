@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 require 'support/shared_examples/existing_headers'
 require 'support/shared_examples/first_page'
@@ -14,7 +16,7 @@ describe NumbersAPI do
     let(:per_page) { last_response.headers['Per-Page'].to_i }
 
     context 'without enough items to give more than one page' do
-      before { get '/numbers', :count => 10 }
+      before { get '/numbers', count: 10 }
 
       it 'should not paginate' do
         expect(last_response.headers.keys).not_to include('Link')
@@ -35,32 +37,32 @@ describe NumbersAPI do
     end
 
     context 'with existing Link headers' do
-      before { get '/numbers', :count => 30, :with_headers => true }
+      before { get '/numbers', count: 30, with_headers: true }
 
       it_behaves_like 'an endpoint with existing Link headers'
     end
 
     context 'with enough items to paginate' do
       context 'when on the first page' do
-        before { get '/numbers', :count => 100 }
+        before { get '/numbers', count: 100 }
 
         it_behaves_like 'an endpoint with a first page'
       end
 
       context 'when on the last page' do
-        before { get '/numbers', :count => 100, :page => 10 }
+        before { get '/numbers', count: 100, page: 10 }
 
         it_behaves_like 'an endpoint with a last page'
       end
 
       context 'when somewhere comfortably in the middle' do
-        before { get '/numbers', :count => 100, :page => 2 }
+        before { get '/numbers', count: 100, page: 2 }
 
         it_behaves_like 'an endpoint with a middle page'
       end
 
       context 'without a max_per_page setting' do
-        before { get '/numbers', :count => 100, :per_page => 30 }
+        before { get '/numbers', count: 100, per_page: 30 }
 
         it 'should list all numbers within per page in the response body' do
           body = '[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]'
@@ -70,7 +72,7 @@ describe NumbersAPI do
       end
 
       context 'with a max_per_page setting not enforced' do
-        before { get '/numbers_with_max_per_page', :count => 100, :per_page => 30 }
+        before { get '/numbers_with_max_per_page', count: 100, per_page: 30 }
 
         it 'should not go above the max_per_page_limit' do
           body = '[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]'
@@ -80,7 +82,7 @@ describe NumbersAPI do
       end
 
       context 'with a max_per_page setting enforced' do
-        before { get '/numbers_with_enforced_max_per_page', :count => 100, :per_page => 30 }
+        before { get '/numbers_with_enforced_max_per_page', count: 100, per_page: 30 }
 
         it 'should not allow value above the max_per_page_limit' do
           body = '{"error":"per_page does not have a valid value"}'
@@ -153,7 +155,7 @@ describe NumbersAPI do
 
     context 'with query string including array parameter' do
       before do
-        get '/numbers', { count: 100, parity: ['odd', 'even']}
+        get '/numbers', { count: 100, parity: %w[odd even] }
       end
 
       it 'returns links with with same received parameters' do

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 shared_examples 'an endpoint with a first page' do
   it 'should not give a link with rel "first"' do
     expect(link).not_to include('rel="first"')

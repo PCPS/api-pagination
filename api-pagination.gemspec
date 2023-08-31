@@ -1,5 +1,6 @@
-# encoding: utf-8
-$:.unshift(File.expand_path('../lib', __FILE__))
+# frozen_string_literal: true
+
+$LOAD_PATH.unshift(File.expand_path('lib', __dir__))
 require 'api-pagination/version'
 
 Gem::Specification.new do |s|
@@ -22,10 +23,11 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'pagy', '~> 5.1', '>= 5.1.2'
   s.add_development_dependency 'will_paginate', '~> 3.3', '>= 3.3.1'
 
-  s.add_development_dependency 'rspec', '~> 3.10'
+  s.add_development_dependency 'actionpack', '~> 6.1', '>= 6.1.4.1'
+  s.add_development_dependency 'activerecord-nulldb-adapter', '~> 0.7.0'
   s.add_development_dependency 'grape', '~> 1.6'
   s.add_development_dependency 'railties', '~> 6.1', '>= 6.1.4.1'
-  s.add_development_dependency 'actionpack', '~> 6.1', '>= 6.1.4.1'
+  s.add_development_dependency 'rspec', '~> 3.10'
+  s.add_development_dependency 'rubocop', '~> 1.0'
   s.add_development_dependency 'sequel', '~> 5.49'
-  s.add_development_dependency 'activerecord-nulldb-adapter', '~> 0.7.0'
 end

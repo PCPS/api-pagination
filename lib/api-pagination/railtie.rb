@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails/railtie'
 
 module ApiPagination
@@ -7,10 +9,10 @@ module ApiPagination
         require 'rails/pagination'
 
         klass = if Rails::VERSION::MAJOR >= 5 || defined?(ActionController::API)
-          ActionController::API
-        else
-          ActionController::Base
-        end
+                  ActionController::API
+                else
+                  ActionController::Base
+                end
 
         klass.send(:include, Rails::Pagination)
       end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Rails
   module Pagination
     protected
@@ -25,12 +27,12 @@ module Rails
     private
 
     def _discover_format(options)
-      for response_format in ApiPagination.config.response_formats
+      ApiPagination.config.response_formats.each do |response_format|
         return response_format if options.key?(response_format)
       end
     end
 
-    def _paginate_collection(collection, options={})
+    def _paginate_collection(collection, options = {})
       options[:page] = ApiPagination.config.page_param(params)
       options[:per_page] ||= ApiPagination.config.per_page_param(params)
 
@@ -41,7 +43,7 @@ module Rails
       pages = ApiPagination.pages_from(pagy || collection, options)
 
       pages.each do |k, v|
-        new_params = request.query_parameters.merge(:page => v)
+        new_params = request.query_parameters.merge(page: v)
         links << %(<#{url}?#{new_params.to_param}>; rel="#{k}")
       end
 
@@ -55,14 +57,14 @@ module Rails
       headers[page_header] = options[:page].to_s unless page_header.nil?
       headers[total_header] = total_count(pagy || collection, options).to_s if include_total
 
-      return collection
+      collection
     end
 
     def total_count(collection, options)
       total_count = if ApiPagination.config.paginator == :kaminari
-        paginate_array_options = options[:paginate_array_options]
-        paginate_array_options[:total_count] if paginate_array_options
-      end
+                      paginate_array_options = options[:paginate_array_options]
+                      paginate_array_options[:total_count] if paginate_array_options
+                    end
       total_count || ApiPagination.total_from(collection)
     end
 
