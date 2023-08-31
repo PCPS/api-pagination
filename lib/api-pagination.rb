@@ -22,7 +22,7 @@ module ApiPagination
       end
     end
 
-    def pages_from(collection, _options = {})
+    def pages_from(collection, options = {})
       return pagy_pages_from(collection) if ApiPagination.config.paginator == :pagy && collection.is_a?(Pagy)
 
       {}.tap do |pages|
@@ -32,7 +32,7 @@ module ApiPagination
         end
 
         unless collection.last_page? || (ApiPagination.config.paginator == :kaminari && collection.out_of_range?)
-          pages[:last] = collection.total_pages if ApiPagination.config.include_total
+          pages[:last] = collection.total_pages if options[:include_total_count] || ApiPagination.config.include_total
           pages[:next] = collection.current_page + 1
         end
       end
