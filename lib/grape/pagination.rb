@@ -29,7 +29,7 @@ module Grape
           include_total   = if options[:include_total_count].nil?
                               ApiPagination.config.include_total
                             else
-                              (options[:include_total_count] && ApiPagination.config.include_total)
+                              options[:include_total_count]
                             end
 
           header 'Link',          links.join(', ') unless links.empty?

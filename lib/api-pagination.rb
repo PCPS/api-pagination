@@ -36,7 +36,7 @@ module ApiPagination
           include_total = if options[:include_total_count].nil?
                             ApiPagination.config.include_total
                           else
-                            (options[:include_total_count] && ApiPagination.config.include_total)
+                            options[:include_total_count]
                           end
 
           pages[:last] = collection.total_pages if include_total
@@ -106,7 +106,7 @@ module ApiPagination
       include_total = if options[:include_total_count].nil?
                         ApiPagination.config.include_total
                       else
-                        (options[:include_total_count] && ApiPagination.config.include_total)
+                        options[:include_total_count]
                       end
 
       collection = Kaminari.paginate_array(collection, **paginate_array_options) if collection.is_a?(Array)
