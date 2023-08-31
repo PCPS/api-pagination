@@ -32,7 +32,14 @@ module ApiPagination
         end
 
         unless collection.last_page? || (ApiPagination.config.paginator == :kaminari && collection.out_of_range?)
-          pages[:last] = collection.total_pages if options[:include_total_count] || ApiPagination.config.include_total
+
+          include_total = if options[:include_total_count].nil?
+                            ApiPagination.config.include_total
+                          else
+                            (options[:include_total_count] && ApiPagination.config.include_total)
+                          end
+
+          pages[:last] = collection.total_pages if include_total
           pages[:next] = collection.current_page + 1
         end
       end
@@ -96,9 +103,15 @@ module ApiPagination
         options[:per_page] = get_default_per_page_for_kaminari(collection)
       end
 
+      include_total = if options[:include_total_count].nil?
+                        ApiPagination.config.include_total
+                      else
+                        (options[:include_total_count] && ApiPagination.config.include_total)
+                      end
+
       collection = Kaminari.paginate_array(collection, **paginate_array_options) if collection.is_a?(Array)
       collection = collection.page(options[:page]).per(options[:per_page])
-      collection.without_count if !collection.is_a?(Array) && (options[:include_total_count] || ApiPagination.config.include_total)
+      collection.without_count if !collection.is_a?(Array) && include_total
 
       [collection, nil]
     end
